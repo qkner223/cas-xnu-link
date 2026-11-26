@@ -1,0 +1,36 @@
+name: link-xnu-kernel
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  link:
+    runs-on: macos-14          # arm64 + 完整 Xcode/ld64，正是缺的那件东西
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 解包 link kit
+        run: |
+          set -euo pipefail
+          if [ -f gh-link-kit.tar.gz ]; then tar -xzf gh-link-kit.tar.gz; fi
+          chmod +x link.sh
+          sw_vers
+          xcrun ld -v 2>&1 | head -2
+
+      - name: 链接
+        run: ./link.sh mach.kernel
+
+      - name: 摘要
+        run: |
+          ls -la mach.kernel
+          shasum -a 256 mach.kernel
+          xcrun nm mach.kernel | grep -E " __start$" | head -2
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mach.kernel
+          path: mach.kernel
+          if-no-files-found: error
