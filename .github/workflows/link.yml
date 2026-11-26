@@ -7,7 +7,7 @@ on:
 
 jobs:
   link:
-    runs-on: macos-14          # arm64 + 完整 Xcode/ld64，正是缺的那件东西
+    runs-on: macos-13          # Intel runner 也能链 arm64，ld64 只看目标架构
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
